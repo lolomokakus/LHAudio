@@ -3,15 +3,15 @@
 ## lhaudio.py
 
 ### High priority
-- Make encoder sampling rate adjustable (via parameter?)
+- [ ] Make encoder sampling rate adjustable (via parameter?)
 
 ### Low priority
-- Try to optimize decoder (it's painfully slow)
+- [ ] Try to optimize decoder (it's painfully slow)
 
 ## *name of gui*
 
 ### High priority
-- Actually write the fucking thing
+- [ ] Actually write the fucking thing
 
 ### Low priority
 None right now
@@ -22,5 +22,5 @@ None right now
 None right now
 
 ### Low priority
-- Make background section less pretentious
+- [ ] Make background section less pretentious
 
