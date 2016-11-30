@@ -7,7 +7,7 @@ This program/library is the result of two classmates' collaboration for the fina
 It was Ludvig who had the idea for the project. He has long been fascinated by 1980's computers, and in particular their methods of storing data on casette tapes in an audible format.
 
 ## Format
-LHAudio uses a special, homebrew format for data storage inside of regular WAV files. It is structured as follows:
+LHAudio uses a special, homebrew format for data storage inside of "regular" (more on that later) WAV files. It is structured as follows:
 
 - [Magic number](https://en.wikipedia.org/wiki/File_format#Magic_number)
 - SHA1 checksum of the data
