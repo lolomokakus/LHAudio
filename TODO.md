@@ -8,7 +8,7 @@
 ### Low priority
 - Try to optimize decoder (it's painfully slow)
 
-## <name of gui>
+## *name of gui*
 
 ### High priority
 - Actually write the fucking thing
