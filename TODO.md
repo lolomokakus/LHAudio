@@ -15,3 +15,12 @@
 
 ### Low priority
 None right now
+
+## README.md
+
+### High priority
+None right now
+
+### Low priority
+- Make background section less pretentious
+
