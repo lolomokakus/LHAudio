@@ -1,107 +1,130 @@
 import hashlib
+import os
 import wave
 import struct
 
-def encode(inFile, outFile):
-    inData = open(inFile, "rb").read()
-    print("Read " + str(len(inData)) + " bytes from " + inFile + ".")
-    inSum = hashlib.sha1()
-    inSum.update(inData)
-    print("Calculated checksum of read data.")
-    outData = wave.open(outFile, "wb")
+def encode(container, *files):
+    if len(files) == 0:
+        raise InvalidArgumentError("no input files specified")
 
-    outData.setnchannels(1)
-    outData.setsampwidth(1)
-    outData.setframerate(8000)
-    print("Set parameters of " + outFile + ".")
+    outFile = wave.open(container, "wb")
+    outFile.setnchannels(1)
+    outFile.setsampwidth(1)
+    outFile.setframerate(8000)
+    print("Set parameters of " + container + ".")
 
-    for byte in range(255, -1, -1):
-        outData.writeframes(struct.pack('B', byte))
+    for file in files:
+        inFile = open(file, "rb")
+        inData = inFile.read()
+        print("Read " + str(len(inData)) + " bytes from " + os.path.basename(file) + ".")
+        inSum = hashlib.sha1()
+        inSum.update(inData)
+        print("Calculated checksum of data.")
 
-    print("Wrote first magic number.")
+        for byte in range(255, -1, -1):
+            outFile.writeframes(struct.pack('B', byte))
+        print("Wrote first magic number.")
 
-    for byte in inSum.digest():
-        outData.writeframes(struct.pack('B', byte))
+        for byte in str.encode(os.path.basename(file)):
+            outFile.writeframes(struct.pack('B', byte))
+        print("Wrote file name.")
 
-    print("Wrote checksum.")
+        for byte in range(255, -1, -1):
+            outFile.writeframes(struct.pack('B', byte))
+        print("Wrote second magic number.")
 
-    for byte in range(255, -1, -1):
-        outData.writeframes(struct.pack('B', byte))
+        for byte in inSum.digest():
+            outFile.writeframes(struct.pack('B', byte))
+        print("Wrote checksum.")
 
-    print("Wrote second magic number.")
+        for byte in range(255, -1, -1):
+            outFile.writeframes(struct.pack('B', byte))
+        print("Wrote third magic number.")
 
-    for byte in inData:
-        outData.writeframes(struct.pack('B', byte))
+        for byte in inData:
+            outFile.writeframes(struct.pack('B', byte))
+        print("Wrote data.")
 
-    print("Wrote data.")
+        for byte in range(255, -1, -1):
+            outFile.writeframes(struct.pack('B', byte))
+        print("Wrote fourth magic number.")
 
-    for byte in range(255, -1, -1):
-        outData.writeframes(struct.pack('B', byte))
+        print("Encoded " + os.path.basename(file) + ".")
 
-    print("Wrote third magic number.")
+        for _ in range(0, 80):
+            outFile.writeframes(struct.pack('B', 0))
+        print("Added 10ms spacer.")
 
-    outData.close()
+        inFile.close()
+
+    outFile.close()
 
     print("Done.")
     return
 
-def decode(inFile, outFile):
+def decode(container):
     magicNumber = []
     for number in range(255, -1, -1):
         magicNumber.append(number)
 
     magicNumber = bytes(magicNumber)
 
-    inData = wave.open(inFile, "rb")
-    outData = open(outFile, "wb")
+    inFile = wave.open(container, "rb")
 
-    if inData.getnchannels() != 1:
+    if inFile.getnchannels() != 1:
         raise InvalidFileError("incorrect amount of channels")
-    if inData.getsampwidth() != 1:
+    if inFile.getsampwidth() != 1:
         raise InvalidFileError("incorrect sample width")
 
-    audioList = inData.readframes(inData.getnframes())
-    print("Read " + str(len(audioList)) + " bytes from " + inFile + ".")
+    inData = inFile.readframes(inFile.getnframes())
+    print("Read " + str(len(inData)) + " bytes from " + str(os.path.basename(container)) + ".")
 
-    if audioList.count(magicNumber) != 3:
+    if inData.count(magicNumber) % 4 != 0:
         raise InvalidFileError("incorrect amount of magic numbers")
 
-    for byte in range(0, len(audioList)):
-        if audioList[byte:byte + len(magicNumber)] == magicNumber:
-            print("Found first magic number.")
-            audioList = audioList[byte + len(magicNumber):]
-            break
+    for _ in range(0, int(inData.count(magicNumber) / 4)):
+        for byte in range(0, len(inData)):
+            if inData[byte:byte + len(magicNumber)] == magicNumber:
+                print("Found first magic number.")
+                inData = inData[byte + len(magicNumber):]
+                break
 
-    for byte in range(0, len(audioList)):
-        if audioList[byte:byte + len(magicNumber)] == magicNumber:
-            print("Found second magic number.")
-            recoveredSum = audioList[:byte]
-            print("Checksum recovered.")
-            audioList = audioList[byte + len(magicNumber):]
-            break
+        for byte in range(0, len(inData)):
+            if inData[byte:byte + len(magicNumber)] == magicNumber:
+                print("Found second magic number.")
+                recoveredName = inData[:byte]
+                print("File name recovered.")
+                inData = inData[byte + len(magicNumber):]
+                break
 
-    for byte in range(0, len(audioList)):
-        if audioList[byte:byte + len(magicNumber)] == magicNumber:
-            print("Found third magic number.")
-            recoveredData = audioList[:byte]
-            print("Data recovered.")
-            break
+        for byte in range(0, len(inData)):
+            if inData[byte:byte + len(magicNumber)] == magicNumber:
+                print("Found third magic number.")
+                recoveredSum = inData[:byte]
+                print("Checksum recovered.")
+                inData = inData[byte + len(magicNumber):]
+                break
 
-    audioList[:] = []
+        for byte in range(0, len(inData)):
+            if inData[byte:byte + len(magicNumber)] == magicNumber:
+                print("Found fourth magic number.")
+                recoveredData = inData[:byte]
+                print("Data recovered.")
+                inData = inData[byte + len(magicNumber):]
+                break
 
-    outSum = hashlib.sha1()
-    outSum.update(recoveredData)
+        inSum = hashlib.sha1()
+        inSum.update(recoveredData)
+        if inSum.digest() != recoveredSum:
+            raise CorruptFileError("checksum mismatch")
+        else:
+            print("Checksum matched.")
 
-    if outSum.digest() != recoveredSum:
-        raise CorruptFileError("checksum mismatch")
-    else:
-        print("Checksum matched.")
+        outFile = open(bytes.decode(recoveredName), "wb")
+        outFile.write(recoveredData)
+        print("Decoded " + bytes.decode(recoveredName) + ".")
 
-    outData.write(recoveredData)
-    print("Wrote recovered data to " + outFile + ".")
-
-    inData.close()
-    outData.close()
+        outFile.close()
 
     print("Done.")
     return
@@ -114,5 +137,9 @@ class CorruptFileError(LHAudioError):
         self.message = message
 
 class InvalidFileError(LHAudioError):
+    def __init__(self, message):
+        self.message = message
+
+class InvalidArgumentError(LHAudioError):
     def __init__(self, message):
         self.message = message
