@@ -13,8 +13,6 @@ def encode(inFile, outFile):
     outData.setnchannels(1)
     outData.setsampwidth(1)
     outData.setframerate(8000)
-    outData.setnframes(0)
-    outData.setcomptype("NONE", "not compressed")
     print("Set parameters of " + outFile + ".")
 
     for byte in range(255, -1, -1):
@@ -57,41 +55,45 @@ def decode(inFile, outFile):
     inData = wave.open(inFile, "rb")
     outData = open(outFile, "wb")
 
-    if not inData.getnchannels() == 1 or not inData.getsampwidth() == 1:
-        raise ValueError("Not a valid LHAudio file.")
+    if inData.getnchannels() != 1:
+        raise InvalidFileError("incorrect amount of channels")
+    if inData.getsampwidth() != 1:
+        raise InvalidFileError("incorrect sample width")
 
     audioList = inData.readframes(inData.getnframes())
     print("Read " + str(len(audioList)) + " bytes from " + inFile + ".")
 
     if audioList.count(magicNumber) != 3:
-        raise ValueError("Not a valid LHAudio file.")
+        raise InvalidFileError("incorrect amount of magic numbers")
 
     for byte in range(0, len(audioList)):
-        if audioList[byte:byte + 256] == magicNumber:
+        if audioList[byte:byte + len(magicNumber)] == magicNumber:
             print("Found first magic number.")
-            audioList = audioList[byte + 256:]
+            audioList = audioList[byte + len(magicNumber):]
             break
 
     for byte in range(0, len(audioList)):
-        if audioList[byte:byte + 256] == magicNumber:
+        if audioList[byte:byte + len(magicNumber)] == magicNumber:
             print("Found second magic number.")
             recoveredSum = audioList[:byte]
             print("Checksum recovered.")
-            audioList = audioList[byte + 256:]
+            audioList = audioList[byte + len(magicNumber):]
             break
 
     for byte in range(0, len(audioList)):
-        if audioList[byte:byte + 256] == magicNumber:
+        if audioList[byte:byte + len(magicNumber)] == magicNumber:
             print("Found third magic number.")
             recoveredData = audioList[:byte]
             print("Data recovered.")
             break
 
+    audioList[:] = []
+
     outSum = hashlib.sha1()
     outSum.update(recoveredData)
 
     if outSum.digest() != recoveredSum:
-        raise ValueError("Checksum mismatch.")
+        raise CorruptFileError("checksum mismatch")
     else:
         print("Checksum matched.")
 
@@ -103,3 +105,14 @@ def decode(inFile, outFile):
 
     print("Done.")
     return
+
+class LHAudioError(Exception):
+    pass
+
+class CorruptFileError(LHAudioError):
+    def __init__(self, message):
+        self.message = message
+
+class InvalidFileError(LHAudioError):
+    def __init__(self, message):
+        self.message = message
