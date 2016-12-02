@@ -6,9 +6,9 @@
 - [ ] Make encoder sampling rate adjustable (via parameter?)
 
 ### Low priority
-- [ ] Try to optimize decoder (it's painfully slow)
+- [ ] Try to optimize encoder (it's painfully slow)
 
-## *name of gui*
+## lhaudioqt.py
 
 ### High priority
 - [ ] Actually write the fucking thing
