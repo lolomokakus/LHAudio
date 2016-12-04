@@ -39,6 +39,6 @@ The `decode()` function takes one argument, the WAV file to decode. The output f
 ## Status
 The Python module, written by Ludvig, is currently usable, even though it could use some tweaking.
 
-The GUI, in the progress of being written by Hugo, is still in an early phase. All we can say for certain is that it will use [PyQt](https://www.riverbankcomputing.com/software/pyqt/intro).
+The GUI, in the progress of being written by Hugo, is still in an early phase. All we can say for certain is that it will use [PyQt](https://www.riverbankcomputing.com/software/pyqt/intro). ***I sure hope an intial version is uploaded soon.***
 
 For more detailed information, check TODO.md.
