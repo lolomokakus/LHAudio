@@ -62,7 +62,7 @@ def encode(container, *files):
     print("Done.")
     return
 
-def decode(container):
+def decode(container, outDir):
     magicNumber = []
     for number in range(255, -1, -1):
         magicNumber.append(number)
@@ -120,7 +120,7 @@ def decode(container):
         else:
             print("Checksum matched.")
 
-        outFile = open(bytes.decode(recoveredName), "wb")
+        outFile = open(os.path.join(outDir, bytes.decode(recoveredName)), "wb")
         outFile.write(recoveredData)
         print("Decoded " + bytes.decode(recoveredName) + ".")
 
