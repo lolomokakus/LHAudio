@@ -32,9 +32,9 @@ Apart from the previously mentioned limitations of the magic number, there are a
 ## The Python module
 The LHAudio Python module contains two functions, `encode()` and `decode()`.
 
-The `encode()` function takes at least two arguments, the first is the WAV file to store the data in and the second is the file to store. If more than two arguments are specified, the other arguments are interpreted as more files to store.
+The `encode()` function takes two arguments, the first is a list containing the names of the files to encode, and the second is a WAV file to encode them in.
 
-The `decode()` function takes one argument, the WAV file to decode. The output files are stored in the current working directory.
+The `decode()` function takes two arguments, the first is the input WAV file, and the second is the directory to store the files in.
 
 ## Status
 The Python module, written by Ludvig, is currently usable, even though it could use some tweaking.
