@@ -3,10 +3,7 @@ import os
 import wave
 import struct
 
-def encode(container, *files):
-    if len(files) == 0:
-        raise InvalidArgumentError("no input files specified")
-
+def encode(files, container):
     outFile = wave.open(container, "wb")
     outFile.setnchannels(1) # Mono
     outFile.setsampwidth(1) # 8 bit sample size
@@ -160,9 +157,5 @@ class CorruptFileError(LHAudioError):
 class InvalidFileError(LHAudioError):
     # Raised when the input WAV doesn't have the correct parameters or
     # contain a correct amount of magic numbers
-    def __init__(self, message):
-        self.message = message
-
-class InvalidArgumentError(LHAudioError):
     def __init__(self, message):
         self.message = message
