@@ -14,6 +14,7 @@
 - [ ] Comment the code 
 - [ ] Improve the playback 
 - [ ] Test on multiple platforms
+- [ ] Fix segmentation fault
 
 ### Low priority
 - [ ] Change a few variables' names
