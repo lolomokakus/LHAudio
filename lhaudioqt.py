@@ -93,7 +93,7 @@ class Window(QDialog):
         self.volume.move(545, 320)
 
         self.setFixedSize(860, 425)
-        self.setWindowTitle("LHAudioQT")
+        self.setWindowTitle("LHAudioQt")
 
     def __del__(self):
         sys.stdout = sys.__stdout__
