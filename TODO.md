@@ -11,10 +11,12 @@
 ## lhaudioqt.py
 
 ### High priority
-- [ ] Actually write the fucking thing
+- [ ] Comment the code 
+- [ ] Improve the playback 
+- [ ] Test on multiple platforms
 
 ### Low priority
-None right now
+- [ ] Change a few variables' names
 
 ## README.md
 
