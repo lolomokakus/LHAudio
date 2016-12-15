@@ -2,9 +2,10 @@ import sys
 import datetime
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
-from PyQt4.phonon import *
+from PyQt4.phonon import Phonon 
 import lhaudio
 import os
+import threading
 
 class Window(QDialog):
     def __init__(self, parent=None):
@@ -19,6 +20,11 @@ class Window(QDialog):
         monoFont = QFont()
         monoFont.setFamily("Monospace")
         monoFont.setPointSize(10)
+
+        self.mediaObject = Phonon.MediaObject(self)
+        self.audioOutput = Phonon.AudioOutput(Phonon.MusicCategory, self)
+        self.path = Phonon.createPath(self.mediaObject, self.audioOutput)
+        self.mediaObject.stateChanged.connect(self.handlePlayStateChanged)
 
         self.inputLabel = QLabel("Input file(s):", self)
         self.inputLabel.move(22, 20)
@@ -65,7 +71,7 @@ class Window(QDialog):
         self.quitButton.move(249, 375)
         self.startButton = QPushButton("Execute", self)
         self.startButton.move(334, 375)
-        self.startButton.clicked.connect(self.execute)
+        self.startButton.clicked.connect(lambda: threading.Thread(target=self.execute).start())
 
         self.terminalLabel = QLabel("Terminal output:", self)
         self.terminalLabel.move(442, 20)
@@ -78,6 +84,13 @@ class Window(QDialog):
         self.terminalWindow.setFont(monoFont)
         self.terminalWindow.resize(398, 200)
         self.terminalWindow.move(440, 41)
+
+        self.playStopButton = QPushButton("Play", self)
+        self.playStopButton.clicked.connect(self.handlePlayState)
+        self.playStopButton.move(665, 320)
+
+        self.volume = Phonon.VolumeSlider(self.audioOutput, self)
+        self.volume.move(545, 320)
 
         self.setFixedSize(860, 425)
         self.setWindowTitle("LHAudioQT")
@@ -93,11 +106,17 @@ class Window(QDialog):
             self.fileList.append(selectedFile)
             self.inputFileList.addItem(selectedFile)
 
+            if len(self.fileList) == 1 and self.fileList[0].endswith(".wav"):
+                self.mediaObject.setCurrentSource(Phonon.MediaSource(self.fileList[0]))
+
+            else:
+                self.mediaObject.setCurrentSource(Phonon.MediaSource(None))
+
     def selectDir(self):
         selectedDir = QFileDialog.getExistingDirectory(self)
 
-        now = datetime.datetime.now()
-        self.outputFile = str(selectedDir) + os.sep + "lhaudio-" + now.strftime("%Y-%m-%d_%H:%M:%S") + ".wav"
+        self.now = datetime.datetime.now()
+        self.outputFile = str(selectedDir) + os.sep + "lhaudio-" + self.now.strftime("%Y-%m-%d_%H:%M:%S") + ".wav"
 
         self.outputDir = str(selectedDir)
 
@@ -107,6 +126,9 @@ class Window(QDialog):
         for selectedItem in self.inputFileList.selectedItems():
             self.fileList.remove(self.inputFileList.currentItem().text())
             self.inputFileList.takeItem(self.inputFileList.row(selectedItem))
+
+            if len(self.fileList) == 1 and self.fileList[0].endswith(".wav"):
+                self.mediaObject.setCurrentSource(Phonon.MediaSource(self.fileList[0]))
 
     def listClear(self):
         self.inputFileList.clear()
@@ -119,6 +141,8 @@ class Window(QDialog):
 
                 self.listClear()
 
+                self.mediaObject.setCurrentSource(Phonon.MediaSource(self.outputFile))
+
             else:
                 print("Select valid input file(s) and output directory")
 
@@ -128,6 +152,7 @@ class Window(QDialog):
                     lhaudio.decode(self.fileList[0], self.outputDir)
 
                     self.listClear()
+                    self.now = datetime.datetime.now()
 
                 else:
                     print("Choose a valid output directory")
@@ -137,6 +162,23 @@ class Window(QDialog):
 
         else:
             print("Uh oh, select mode")
+
+    def handlePlayState(self):
+        if self.mediaObject.state() == Phonon.PlayingState:
+            self.mediaObject.stop()
+        else:
+            self.mediaObject.play()
+
+    def handlePlayStateChanged(self, newstate, oldstate):
+        if newstate == Phonon.PlayingState:
+            self.playStopButton.setText("Stop")
+
+        elif newstate == Phonon.StoppedState:
+            self.playStopButton.setText("Play")
+
+        elif newstate == Phonon.ErrorState:
+            source = self.mediaObject.currentSource().fileName()
+            print("ERROR: could not play" + source.toLocal8Bit().data())
 
     def normalOutputWritten(self, text):
         cursor = self.terminalWindow.textCursor()
@@ -153,6 +195,7 @@ class EmittingStream(QObject):
 
 def main(args):
     app = QApplication(args)
+
     mainWindow = Window()
     mainWindow.show()
     sys.exit(app.exec_())
