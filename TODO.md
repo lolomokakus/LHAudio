@@ -3,7 +3,7 @@
 ## lhaudio.py
 
 ### High priority
-- [ ] Make encoder sampling rate adjustable (via parameter?)
+None right now
 
 ### Low priority
 - [ ] Try to optimize encoder (it's painfully slow)
@@ -11,8 +11,8 @@
 ## lhaudioqt.py
 
 ### High priority
-- [ ] Comment the code 
-- [ ] Improve the playback 
+- [ ] Comment the code
+- [ ] Improve the playback
 - [ ] Test on multiple platforms
 
 ### Low priority
@@ -25,4 +25,3 @@ None right now
 
 ### Low priority
 - [ ] Make background section less pretentious
-
