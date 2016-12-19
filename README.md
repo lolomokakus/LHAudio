@@ -37,15 +37,13 @@ The `encode()` function takes two arguments, the first is a list containing the 
 The `decode()` function takes two arguments, the first is the input WAV file, and the second is the directory to store the files in.
 
 ## The GUI
-The LHAudioQt GUI uses PyQt to form a user interface for the LHAudio module.
+The LHAudioQt GUI uses PyQt and Phonon to form a user interface for the LHAudio module.
 
 It is able to encode files and decode LHAudio files, and it can also play the encoded files.
 
-**DISCLAIMER:** it's poorly written as hell.
-
 ## Status
-The Python module, written by Ludvig, is currently usable, even though it could use some tweaking.
+The Python module, written by Ludvig, is pretty much finalized and works quite well.
 
-The GUI, written by Hugo, is now usable, too! Still a bit of work to be done.
+The GUI, written by Hugo, is usable, even though it is a hacked together piece of crap.
 
 For more detailed information, check TODO.md.
